@@ -18,4 +18,16 @@ interface CurrencyDao {
     @Query("SELECT * FROM currency WHERE currecyCode=:currecyCode")
     fun getRate(currecyCode: String): LiveData<CurrecnyRoomModel>
 
+    @Query("SELECT COUNT(*) FROM CURRENCY")
+    fun getRowCount(): LiveData<Int>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertPauseRefreshTime(vararg pauseRefreshRoomModel: PauseRefreshRoomModel)
+
+    @Query("DELETE FROM pauseRefresh")
+    suspend fun deletePauseTime()
+
+    @Query("SELECT * FROM pauseRefresh")
+    fun getPauseRefreshTime(): LiveData<PauseRefreshRoomModel>
+
 }

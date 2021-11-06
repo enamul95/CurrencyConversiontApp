@@ -4,8 +4,6 @@ import androidx.lifecycle.LiveData
 
 class CurrencyRoomRepository(private val currencyDao: CurrencyDao) {
 
-   // private lateinit var rate: LiveData<CurrecnyRoomModel>
-
     suspend fun addCurrency(currecnyRoomModel: CurrecnyRoomModel) {
         currencyDao.insertAll(currecnyRoomModel)
     }
@@ -16,6 +14,23 @@ class CurrencyRoomRepository(private val currencyDao: CurrencyDao) {
 
      fun getRate(currecyCode: String): LiveData<CurrecnyRoomModel>{
         return currencyDao.getRate(currecyCode)
-        //return currencyDao.getRate(currecyCode)
     }
+
+    fun getRowCount(): LiveData<Int>{
+        return currencyDao.getRowCount()
+    }
+
+    suspend fun addRefressPauseTime(pauseRefreshRoomModel: PauseRefreshRoomModel) {
+        currencyDao.insertPauseRefreshTime(pauseRefreshRoomModel)
+    }
+
+    suspend fun deletePauseTime() {
+        currencyDao.deletePauseTime()
+    }
+
+    fun getPauseRefreshTime(): LiveData<PauseRefreshRoomModel>{
+        return currencyDao.getPauseRefreshTime()
+    }
+
+
 }

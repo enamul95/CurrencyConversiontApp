@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [CurrecnyRoomModel::class],
+    entities = [CurrecnyRoomModel::class,PauseRefreshRoomModel::class],
     version = 1,
     exportSchema = false
 )

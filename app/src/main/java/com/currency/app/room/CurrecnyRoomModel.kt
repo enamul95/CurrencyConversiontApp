@@ -12,7 +12,7 @@ import kotlinx.android.parcel.Parcelize
 @Entity(
     tableName = "currency", indices = arrayOf(
         Index(
-            value = ["sl", "currecyCode"],
+            value = ["ID", "currecyCode"],
             unique = true
         )
     )
@@ -21,9 +21,9 @@ import kotlinx.android.parcel.Parcelize
 data class CurrecnyRoomModel(
 
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "sl")
-    @SerializedName("sl")
-    var sl: Int = 0,
+    @ColumnInfo(name = "ID")
+    @SerializedName("ID")
+    var id: Int = 0,
 
     @ColumnInfo(name = "currecyCode")
     @SerializedName("currecyCode")
@@ -45,8 +45,4 @@ data class CurrecnyRoomModel(
     @SerializedName("currecyRate")
     var currecyRate: Double = 0.00
 
-
-
-
-
-): Parcelable
+) : Parcelable

@@ -7,27 +7,25 @@ import androidx.lifecycle.viewModelScope
 import com.currency.app.room.CurrecnyRoomModel
 import com.currency.app.room.CurrencyDB
 import com.currency.app.room.CurrencyRoomRepository
+import com.currency.app.room.PauseRefreshRoomModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class CurrecnyRoomViewMoel(application: Application) : AndroidViewModel(application) {
 
     private val repository: CurrencyRoomRepository
-
-   // private lateinit var currencyRateRepsone:  LiveData<CurrecnyRoomModel>
-
     var currencyRateRepsone: LiveData<CurrecnyRoomModel>? = null
+    var pauseRefreshRepsone: LiveData<PauseRefreshRoomModel>? = null
+    var rowCountResposne: LiveData<Int>? = null
 
     init {
         val currencyDB = CurrencyDB.getDatabase(application).CurrencyDao()
         repository = CurrencyRoomRepository(currencyDB)
-        //currencyRateRepsone = repository.getRate()
     }
 
     fun addCurrency(currecnyRoomModel: CurrecnyRoomModel) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.addCurrency(currecnyRoomModel)
-
         }
     }
 
@@ -38,8 +36,35 @@ class CurrecnyRoomViewMoel(application: Application) : AndroidViewModel(applicat
     }
 
 
-    fun getRate(currecyCode: String) : LiveData<CurrecnyRoomModel>? {
+    fun getRate(currecyCode: String): LiveData<CurrecnyRoomModel>? {
         currencyRateRepsone = repository.getRate(currecyCode)
         return currencyRateRepsone
     }
+
+    fun getRowCount(): LiveData<Int>? {
+        rowCountResposne = repository.getRowCount()
+        return rowCountResposne
+    }
+
+    fun addPauseRefreshTime(pauseRefreshRoomModel: PauseRefreshRoomModel) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.addRefressPauseTime(pauseRefreshRoomModel)
+        }
+    }
+
+    fun deletePauseTime() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deletePauseTime()
+        }
+    }
+
+    fun getPauseRefreshTime(): LiveData<PauseRefreshRoomModel>? {
+        pauseRefreshRepsone = repository.getPauseRefreshTime()
+        return pauseRefreshRepsone
+    }
+
+
+
+
+
 }

@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.*
@@ -21,6 +23,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.currency.app.adapter.CurrecnyGridAdapter
 import com.currency.app.room.CurrecnyRoomModel
+import com.currency.app.room.PauseRefreshRoomModel
+import com.currency.app.util.Constrants
 import com.currency.app.viewmodel.CurrecnyRoomViewMoel
 
 
@@ -38,9 +42,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var currencyList: java.util.ArrayList<CurrecnyRoomModel>
     private lateinit var currecnyRoomViewMoel: CurrecnyRoomViewMoel
 
+    lateinit var mainHandler: Handler
+
     var from = ""
     var to = ""
     var conversionCurrencyCode = ""
+
+    var isRunning: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +56,7 @@ class MainActivity : AppCompatActivity() {
 
         currencyViewModel = ViewModelProvider(this).get(CurrencyViewModel::class.java)
         currecnyRoomViewMoel = ViewModelProvider(this).get(CurrecnyRoomViewMoel::class.java)
+        mainHandler = Handler(Looper.getMainLooper())
 
         pDialog = ProgressDialog(this)
         pDialog.setTitle("Please wait...")
@@ -80,12 +89,16 @@ class MainActivity : AppCompatActivity() {
                 view.findViewById<View>(R.id.tvCurrencyCode) as TextView
             if (etAmount.text.toString().trim() == "") {
                 Toast.makeText(applicationContext, "Please Enter Amount", Toast.LENGTH_SHORT).show()
-            }else if(spCurrecncy.selectedItem.toString() == tvCurrencyCode.text.toString()){
-                Toast.makeText(applicationContext, "Currey Amount is Same to Currency Conversion.Please Select Different Conversion.", Toast.LENGTH_SHORT).show()
+            } else if (spCurrecncy.selectedItem.toString() == tvCurrencyCode.text.toString()) {
+                Toast.makeText(
+                    applicationContext,
+                    "Currey Amount is Same to Currency Conversion.Please Select Different Conversion.",
+                    Toast.LENGTH_SHORT
+                ).show()
             } else {
                 conversionCurrencyCode = tvCurrencyCode.text.toString()
                 var currencyCode =
-                    spCurrecncy.selectedItem.toString()+conversionCurrencyCode
+                    spCurrecncy.selectedItem.toString() + conversionCurrencyCode
                 currecnyRoomViewMoel.getRate(currencyCode)
 
                 observeViewModel()
@@ -99,8 +112,7 @@ class MainActivity : AppCompatActivity() {
         if (!CheckNetwork.isOnline(this@MainActivity)) {
             Toast.makeText(applicationContext, "No Internet Connection", Toast.LENGTH_SHORT).show()
         } else {
-
-            //getCurrencyData()
+            getRowCount();
         }
 
 
@@ -110,6 +122,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
+
+        currecnyRoomViewMoel.rowCountResposne?.observe(this, {
+            it?.let {
+                Log.e("row", it.toString())
+                if (it == 0) {
+                    getCurrencyData()
+                }
+            }
+        })
 
         currencyViewModel.currecnyResponse.observe(this, {
             it?.let {
@@ -135,7 +156,6 @@ class MainActivity : AppCompatActivity() {
                                 )
                             }
                         currecnyRoomModel?.let { it1 -> currecnyRoomViewMoel.addCurrency(it1) }
-                        // currecnyRoomModel?.let { it1 -> currencyList.add(it1) }
                     }
 
                 } else {
@@ -161,17 +181,18 @@ class MainActivity : AppCompatActivity() {
         })
 
 
+
     }
 
     fun convertionAmount(currecyRate: Double) {
 
         try {
             var amount = etAmount.text.toString().trim().toDouble()
-            var conversionAmount = amount*currecyRate
+            var conversionAmount = amount * currecyRate
 
-            tvConvertionAmont.setText(conversionAmount.toString()+" "+conversionCurrencyCode)
+            tvConvertionAmont.setText(conversionAmount.toString() + " " + conversionCurrencyCode)
 
-        }catch (e:Exception){
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 
@@ -197,21 +218,75 @@ class MainActivity : AppCompatActivity() {
         gvCurrency.adapter = adapter
     }
 
+    private fun getRowCount() {
+        currecnyRoomViewMoel.getRowCount()
+    }
+
+
     private fun getCurrencyData() {
-        pDialog.show()
+        Log.e("***api***", "caling*****")
+        // pDialog.show()
 
-        // for (i in 0 until currencyCodes.size){
-        // Log.e("currency--->",currencyCodes[i])
         val model = CurrencyModel()
-        model.access_key = "0b3471b49fd30569f3fe054d1a6dd38b"
+        model.access_key = Constrants.access_key
         //model.currencies = "EUR,GBP,CAD,PLN"
-        model.source = "USD"
-        model.format = "1"
-        this.let { currencyViewModel.getCurrencyData(model) }
-        //  }
-
+        model.source = Constrants.source
+        model.format = Constrants.format
+        // this.let { currencyViewModel.getCurrencyData(model) }
 
     }
 
+    //Api call after 30 minutes
+    override fun onPause() {
+        super.onPause()
+        mainHandler.removeCallbacks(updateTextTask)
+        currecnyRoomViewMoel.deletePauseTime()
+        var pasusMillisecon = System.currentTimeMillis();
+        var pauseTime = PauseRefreshRoomModel(0, pasusMillisecon, true)
+        currecnyRoomViewMoel.addPauseRefreshTime(pauseTime)
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkPauseTime()
+        mainHandler.post(updateTextTask)
+
+    }
+
+    private val updateTextTask = object : Runnable {
+        override fun run() {
+            mainHandler.postDelayed(this, Constrants.refreshApiTime)
+            if (isRunning) {
+                getCurrencyData()
+            }
+            isRunning = true
+
+        }
+    }
+
+    private fun checkPauseTime() {
+        currecnyRoomViewMoel.getPauseRefreshTime()
+        pauseObservable()
+
+    }
+
+    fun pauseObservable() {
+
+        currecnyRoomViewMoel.pauseRefreshRepsone?.observe(this, {
+            it?.let {
+                Log.e("pause ****",it.isPause.toString())
+                currecnyRoomViewMoel.deletePauseTime()
+                if (it.isPause) {
+                    var difm = System.currentTimeMillis() - it.pasuseMillisecon
+                    if (difm > Constrants.refreshApiTime) {
+
+                        //refresh api
+                        getCurrencyData()
+                    }
+                }
+            }
+        })
+    }
 
 }

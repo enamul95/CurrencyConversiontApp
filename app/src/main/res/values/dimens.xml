@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="textsize_base">16sp</dimen>
+
+    <dimen name="maring_5">5dp</dimen>
+    <dimen name="maring_10">10dp</dimen>
+
+    <dimen name="horizontal_spacing">10dp</dimen>
+    <dimen name="vertical_spacing">10dp</dimen>
+    <dimen name="grid_item_spacing">10dp</dimen>
+
+    <dimen name="text_size_base">16sp</dimen>
+
+
+</resources>

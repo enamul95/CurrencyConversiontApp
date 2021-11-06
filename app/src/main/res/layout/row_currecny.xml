@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/round_grid_items"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/maring_5"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/tvCurrencyCode"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="BDT"
+            android:gravity="center"
+            android:padding="@dimen/maring_5"
+            android:textSize="@dimen/text_size_base"/>
+    </LinearLayout>
+
+</LinearLayout>

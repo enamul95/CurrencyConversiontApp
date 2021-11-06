@@ -28,7 +28,7 @@ class CurrencyViewModel : ViewModel() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeWith(object : DisposableSingleObserver<CurrencyDataModel>() {
                 override fun onSuccess(model: CurrencyDataModel) {
-                    model?.let {
+                    model.let {
                         currecnyResponse.value = model
                     }
 

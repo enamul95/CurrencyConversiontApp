@@ -31,7 +31,7 @@ class ApiService {
     fun getCurrencyData(model: CurrencyModel): Single<CurrencyDataModel> {
         return api.getCurrencyData(
             model.access_key,
-            model.currencies,
+           // model.currencies,
             model.source,
             model.format
 

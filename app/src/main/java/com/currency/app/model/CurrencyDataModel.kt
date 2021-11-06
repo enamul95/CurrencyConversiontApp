@@ -16,13 +16,13 @@ data class CurrencyDataModel(
 
 )
 
-data class Quotes(
-    @SerializedName("success")
-    var success: Boolean?,
-
-    @SerializedName("timestamp")
-    var timestamp: Int?
-)
+//data class Quotes(
+//    @SerializedName("success")
+//    var success: Boolean?,
+//
+//    @SerializedName("timestamp")
+//    var timestamp: Int?
+//)
 
 data class ErrorDataModel(
     var errorCode: String? = "",

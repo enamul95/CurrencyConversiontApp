@@ -36,7 +36,8 @@ class CurrencyViewModel : ViewModel() {
 
                 override fun onError(e: Throwable) {
                     e.printStackTrace()
-                   // errorResponse.value = RetrofitErrorMessage.getLoginErrorMessage(e)
+                    errorResponse.value = ErrorDataModel("1",e.message)
+                    // errorResponse.value = RetrofitErrorMessage.getLoginErrorMessage(e)
 
                 }
 

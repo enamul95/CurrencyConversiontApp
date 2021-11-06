@@ -16,7 +16,7 @@ interface Api {
     @GET("live")
     fun getCurrencyData(
         @Query("access_key") access_key: String?,
-        @Query("currencies") currencies: String?,
+       // @Query("currencies") currencies: String?,
         @Query("source") source: String?,
         @Query("format") format: String?,
     ): Single<CurrencyDataModel>

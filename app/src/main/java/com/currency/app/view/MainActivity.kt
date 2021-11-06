@@ -1,5 +1,6 @@
 package com.currency.app.view
 
+import android.app.ProgressDialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -13,6 +14,8 @@ import com.currency.app.util.CheckNetwork
 import com.currency.app.viewmodel.CurrencyViewModel
 import android.widget.ArrayAdapter
 import com.currency.app.adapter.CurrecnyGridAdapter
+import com.currency.app.room.CurrecnyRoomModel
+import com.currency.app.viewmodel.CurrecnyRoomViewMoel
 
 
 class MainActivity : AppCompatActivity() {
@@ -25,20 +28,30 @@ class MainActivity : AppCompatActivity() {
     private lateinit var gvCurrency: GridView
 
     private lateinit var currencyCodes: Array<String>
+    private lateinit var pDialog:ProgressDialog
+    private lateinit var currencyList: java.util.ArrayList<CurrecnyRoomModel>
+    private lateinit var currecnyRoomViewMoel: CurrecnyRoomViewMoel
+
+    var from = ""
+    var to = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         currencyViewModel = ViewModelProvider(this).get(CurrencyViewModel::class.java)
+        currecnyRoomViewMoel = ViewModelProvider(this).get(CurrecnyRoomViewMoel::class.java)
+
+        pDialog = ProgressDialog(this)
+        pDialog.setTitle("Please wait...")
 
         etAmount = findViewById(R.id.etAmount)
         spCurrecncy = findViewById(R.id.spCurrecncy)
         tvConvertionAmont = findViewById(R.id.tvConvertionAmont)
-
         gvCurrency = findViewById(R.id.gvCurrency)
-
         currencyCodes = resources.getStringArray(R.array.currency_codes)
+
+
 
         spCurrecncy.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
@@ -47,7 +60,7 @@ class MainActivity : AppCompatActivity() {
                 position: Int,
                 id: Long,
             ) {
-                Toast.makeText(applicationContext, spCurrecncy.selectedItem.toString(), Toast.LENGTH_SHORT).show()
+               // Toast.makeText(applicationContext, spCurrecncy.selectedItem.toString(), Toast.LENGTH_SHORT).show()
 
             }
 
@@ -66,21 +79,51 @@ class MainActivity : AppCompatActivity() {
         observeViewModel()
     }
 
-    fun observeViewModel() {
+    private fun observeViewModel() {
+
         currencyViewModel.currecnyResponse.observe(this, {
             it?.let {
+                pDialog.dismiss()
+                currencyList = java.util.ArrayList<CurrecnyRoomModel>()
+                currencyList.clear()
               if(it.success == true){
-                //  Log.e("quotes---->",",it.)
-                 Log.e("**quotes***********",it.quotes.toString())
-                //  print("***********print*************")
-                  //print(it.quotes)
+                  currecnyRoomViewMoel.deleteAllCurrency()
+                  val keys: ArrayList<String> = ArrayList(it.quotes!!.keys)
+                  for (i in keys.indices) {
+                      val currecyCode = keys[i]
+                     var currencyRate =  it.quotes?.get(currecyCode)
+
+                      if (currecyCode.length > 3) {
+                          from = currecyCode.substring(0,3)
+                          to = currecyCode.substring(currecyCode.length - 3, currecyCode.length)
+                      }
+
+                      var currecnyRoomModel =
+                          currencyRate?.let { it1 ->
+                          CurrecnyRoomModel(
+                              0,currecyCode, from,to, 1.0,it1
+                          )
+                      }
+                      currecnyRoomModel?.let { it1 -> currecnyRoomViewMoel.addCurrency(it1) }
+                     // currecnyRoomModel?.let { it1 -> currencyList.add(it1) }
+                  }
+
               }else{
                   Toast.makeText(applicationContext, "Currency Not Found.", Toast.LENGTH_SHORT).show()
               }
-               // Toast.makeText(applicationContext, "Succss"+it.quotes, Toast.LENGTH_SHORT).show()
+
+            }
+        })
+
+        currencyViewModel.errorResponse.observe(this, {
+            it?.let {
+                pDialog.dismiss()
+                Toast.makeText(applicationContext, it.errorMessage, Toast.LENGTH_SHORT).show()
+
             }
         })
     }
+
 
     private fun currecySpinnerLoad() {
 
@@ -97,22 +140,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun populateGridView(){
-//        val adapter: ArrayAdapter<String> =
-//            ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, currencyCodes)
-//        gvCurrency.adapter = adapter
-
-      var  adapter = CurrecnyGridAdapter(this@MainActivity, currencyCodes)
+      val adapter = CurrecnyGridAdapter(this@MainActivity, currencyCodes)
         gvCurrency.adapter = adapter
     }
 
     private fun getCurrencyData() {
-      // pDialog.show()
-        val model = CurrencyModel()
-        model.access_key = "0b3471b49fd30569f3fe054d1a6dd38b"
-        model.currencies = "EUR,GBP,CAD,PLN"
-        model.source = "USD"
-        model.format = "1"
-        this.let { currencyViewModel.getCurrencyData(model) }
+       pDialog.show()
+
+       // for (i in 0 until currencyCodes.size){
+           // Log.e("currency--->",currencyCodes[i])
+            val model = CurrencyModel()
+            model.access_key = "0b3471b49fd30569f3fe054d1a6dd38b"
+            //model.currencies = "EUR,GBP,CAD,PLN"
+           model.source = "USD"
+            model.format = "1"
+            this.let { currencyViewModel.getCurrencyData(model) }
+      //  }
+
+
     }
 
 

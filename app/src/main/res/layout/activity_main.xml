@@ -21,9 +21,9 @@
             android:id="@+id/etAmount"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="Enter amount"
+            android:hint="@string/amount_hints"
             android:inputType="numberDecimal"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="@dimen/maring_5"
             android:layout_weight="1"/>
 
         <androidx.appcompat.widget.AppCompatSpinner

@@ -3,6 +3,7 @@
     <string name="amount_hints">Enter amount</string>
 
     <string-array name="currency_codes">
+        <item>USD</item>
         <item>AED</item>
         <item>AFN</item>
         <item>CAD</item>
@@ -32,7 +33,7 @@
         <item>NOK</item>
         <item>NZD</item>
         <item>ZAR</item>
-        <item>USD</item>
+<!--        <item>USD</item>-->
         <item>MXN</item>
         <item>ILS</item>
         <item>GBP</item>

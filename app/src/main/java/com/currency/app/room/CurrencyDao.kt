@@ -1,5 +1,6 @@
 package com.currency.app.room
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -13,4 +14,8 @@ interface CurrencyDao {
 
     @Query("DELETE FROM currency")
     suspend fun deleteAllCurrency()
+
+    @Query("SELECT * FROM currency WHERE currecyCode=:currecyCode")
+    fun getRate(currecyCode: String): LiveData<CurrecnyRoomModel>
+
 }

@@ -15,7 +15,10 @@ interface CurrencyDao {
     @Query("DELETE FROM currency")
     suspend fun deleteAllCurrency()
 
-    @Query("SELECT * FROM currency WHERE currecyCode=:currecyCode")
+    @Query("SELECT * FROM currency ")
+    fun getCurrencList(): LiveData<List<CurrecnyRoomModel>>
+
+    @Query("SELECT * FROM currency WHERE conversionCurrency =:currecyCode")
     fun getRate(currecyCode: String): LiveData<CurrecnyRoomModel>
 
     @Query("SELECT COUNT(*) FROM CURRENCY")

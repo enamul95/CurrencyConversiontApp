@@ -10,6 +10,8 @@
     <dimen name="grid_item_spacing">10dp</dimen>
 
     <dimen name="text_size_base">16sp</dimen>
+    <dimen name="margin_5">5dp</dimen>
+    <dimen name="divider_height_base">1dp</dimen>
 
 
 </resources>

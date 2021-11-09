@@ -8,8 +8,10 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import com.currency.app.R
+import com.currency.app.model.CurrencyAdapterModel
+import java.util.ArrayList
 
-class CurrecnyGridAdapter(private var activity: Activity, private var currencyCodes: Array<String>) :  BaseAdapter() {
+class CurrecnyGridAdapter(private var activity: Activity, private var currencyList: ArrayList<CurrencyAdapterModel>) :  BaseAdapter() {
 
 
     private class ViewHolder(row: View) {
@@ -20,11 +22,11 @@ class CurrecnyGridAdapter(private var activity: Activity, private var currencyCo
     }
 
     override fun getCount(): Int {
-      return  currencyCodes.size
+      return  currencyList.size
     }
 
     override fun getItem(position: Int): Any {
-         return  currencyCodes.size
+         return  currencyList.size
     }
 
     override fun getItemId(position: Int): Long {
@@ -45,8 +47,8 @@ class CurrecnyGridAdapter(private var activity: Activity, private var currencyCo
             viewHolder = view.tag as ViewHolder
         }
 
-       // var item = currencyCodes[position]
-        viewHolder.tvCurrencyCode?.text =  currencyCodes[position]
+        var currency = currencyList[position]
+        viewHolder.tvCurrencyCode?.text =  currency.conversionCurrency
 
         return view as View
     }

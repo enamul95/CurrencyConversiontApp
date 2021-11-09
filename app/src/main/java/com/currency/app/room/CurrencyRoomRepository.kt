@@ -4,12 +4,18 @@ import androidx.lifecycle.LiveData
 
 class CurrencyRoomRepository(private val currencyDao: CurrencyDao) {
 
+
+
     suspend fun addCurrency(currecnyRoomModel: CurrecnyRoomModel) {
         currencyDao.insertAll(currecnyRoomModel)
     }
 
     suspend fun deleteAllCurrency() {
         currencyDao.deleteAllCurrency()
+    }
+
+    fun getCurrencyList(): LiveData<List<CurrecnyRoomModel>>{
+        return currencyDao.getCurrencList()
     }
 
      fun getRate(currecyCode: String): LiveData<CurrecnyRoomModel>{

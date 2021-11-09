@@ -14,7 +14,9 @@ import kotlinx.coroutines.launch
 class CurrecnyRoomViewMoel(application: Application) : AndroidViewModel(application) {
 
     private val repository: CurrencyRoomRepository
-    var currencyRateRepsone: LiveData<CurrecnyRoomModel>? = null
+    var sourceCurrencyRateRepsone: LiveData<CurrecnyRoomModel>? = null
+    var conversionCurrencyRateRepsone: LiveData<CurrecnyRoomModel>? = null
+    var currencyListRepsone: LiveData<List<CurrecnyRoomModel>>? = null
     var pauseRefreshRepsone: LiveData<PauseRefreshRoomModel>? = null
     var rowCountResposne: LiveData<Int>? = null
 
@@ -36,9 +38,14 @@ class CurrecnyRoomViewMoel(application: Application) : AndroidViewModel(applicat
     }
 
 
-    fun getRate(currecyCode: String): LiveData<CurrecnyRoomModel>? {
-        currencyRateRepsone = repository.getRate(currecyCode)
-        return currencyRateRepsone
+    fun getSourceCurrencyRate(currecyCode: String): LiveData<CurrecnyRoomModel>? {
+        sourceCurrencyRateRepsone = repository.getRate(currecyCode)
+        return sourceCurrencyRateRepsone
+    }
+
+    fun getConversionCurrencyRate(currecyCode: String): LiveData<CurrecnyRoomModel>? {
+        conversionCurrencyRateRepsone = repository.getRate(currecyCode)
+        return conversionCurrencyRateRepsone
     }
 
     fun getRowCount(): LiveData<Int>? {
@@ -64,7 +71,10 @@ class CurrecnyRoomViewMoel(application: Application) : AndroidViewModel(applicat
     }
 
 
-
+    fun getCurrencyList(): LiveData<List<CurrecnyRoomModel>>? {
+        currencyListRepsone = repository.getCurrencyList()
+        return currencyListRepsone
+    }
 
 
 }

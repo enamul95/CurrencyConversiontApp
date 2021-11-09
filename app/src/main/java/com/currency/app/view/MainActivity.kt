@@ -1,10 +1,6 @@
 package com.currency.app.view
 
-import android.Manifest
 import android.app.ProgressDialog
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -19,9 +15,9 @@ import com.currency.app.model.CurrencyModel
 import com.currency.app.util.CheckNetwork
 import com.currency.app.viewmodel.CurrencyViewModel
 import android.widget.ArrayAdapter
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.currency.app.adapter.CurrecnyGridAdapter
+import com.currency.app.adapter.CurrencySpinnerAdapter
+import com.currency.app.model.CurrencyAdapterModel
 import com.currency.app.room.CurrecnyRoomModel
 import com.currency.app.room.PauseRefreshRoomModel
 import com.currency.app.util.Constrants
@@ -45,10 +41,12 @@ class MainActivity : AppCompatActivity() {
     lateinit var mainHandler: Handler
 
     var from = ""
-    var to = ""
+    var conversionCurrency = ""
     var conversionCurrencyCode = ""
 
     var isRunning: Boolean = false
+    private var currencyAdapterList: java.util.ArrayList<CurrencyAdapterModel> =
+        java.util.ArrayList<CurrencyAdapterModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,8 +74,13 @@ class MainActivity : AppCompatActivity() {
                 position: Int,
                 id: Long,
             ) {
-                // Toast.makeText(applicationContext, spCurrecncy.selectedItem.toString(), Toast.LENGTH_SHORT).show()
-
+                var tv_currecy_code: TextView? = view?.findViewById(R.id.tv_currecy_code)
+             var currencyCode = tv_currecy_code?.text.toString()
+                Toast.makeText(applicationContext, currencyCode, Toast.LENGTH_SHORT).show()
+               // if(tv_currecy_code?.text.toString() != ""){
+                    currecnyRoomViewMoel.getSourceCurrencyRate(currencyCode)
+               // }
+               // observeViewModel()
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -97,10 +100,9 @@ class MainActivity : AppCompatActivity() {
                 ).show()
             } else {
                 conversionCurrencyCode = tvCurrencyCode.text.toString()
-                var currencyCode =
-                    spCurrecncy.selectedItem.toString() + conversionCurrencyCode
-                currecnyRoomViewMoel.getRate(currencyCode)
-
+               // var currencyCode = spCurrecncy.selectedItem.toString() + conversionCurrencyCode
+               // currecnyRoomViewMoel.getRate(currencyCode)
+                currecnyRoomViewMoel.getConversionCurrencyRate(conversionCurrencyCode)
                 observeViewModel()
             }
 
@@ -115,6 +117,7 @@ class MainActivity : AppCompatActivity() {
             getRowCount();
         }
 
+        currecnyRoomViewMoel.getCurrencyList()
 
         currecySpinnerLoad()
         populateGridView()
@@ -132,6 +135,23 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        currecnyRoomViewMoel.currencyListRepsone?.observe(this, {
+            it?.let {
+                for (i in 0 until it!!.size) {
+                    val model = CurrencyAdapterModel(
+                        it[i].id,
+                        it[i].currecyCode.toString(),
+                        it[i].from.toString(),
+                        it[i].conversionCurrency.toString(),
+                        it[i].currecyRate
+                    )
+                    currencyAdapterList.add(model)
+                }
+                populateGridView()
+                currecySpinnerLoad()
+
+            }
+        })
         currencyViewModel.currecnyResponse.observe(this, {
             it?.let {
                 pDialog.dismiss()
@@ -146,17 +166,20 @@ class MainActivity : AppCompatActivity() {
 
                         if (currecyCode.length > 3) {
                             from = currecyCode.substring(0, 3)
-                            to = currecyCode.substring(currecyCode.length - 3, currecyCode.length)
+                            conversionCurrency = currecyCode.substring(currecyCode.length - 3, currecyCode.length)
                         }
 
                         var currecnyRoomModel =
                             currencyRate?.let { it1 ->
                                 CurrecnyRoomModel(
-                                    0, currecyCode, from, to, 1.0, it1
+                                    0, currecyCode, from, conversionCurrency, currencyRate,
                                 )
                             }
                         currecnyRoomModel?.let { it1 -> currecnyRoomViewMoel.addCurrency(it1) }
                     }
+
+                    finish();
+                    startActivity(getIntent());
 
                 } else {
                     Toast.makeText(applicationContext, "Currency Not Found.", Toast.LENGTH_SHORT)
@@ -174,9 +197,16 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        currecnyRoomViewMoel.currencyRateRepsone?.observe(this, {
+        currecnyRoomViewMoel.sourceCurrencyRateRepsone?.observe(this, {
             it?.let {
-                convertionAmount(it.currecyRate)
+                //convertionAmount(it.currecyRate)
+                Toast.makeText(applicationContext, "source -->"+it.currecyRate.toString(), Toast.LENGTH_SHORT).show()
+            }
+        })
+
+        currecnyRoomViewMoel.conversionCurrencyRateRepsone?.observe(this, {
+            it?.let {
+                Toast.makeText(applicationContext, "conversion -->"+it.currecyRate.toString(), Toast.LENGTH_SHORT).show()
             }
         })
 
@@ -199,22 +229,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun currecySpinnerLoad() {
+//
+//        val adapter: ArrayAdapter<String> =
+//
+//            ArrayAdapter<String>(
+//                this,
+//                R.layout.spinner_text, currencyCodes
+//            )
+//
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//        spCurrecncy.adapter = adapter
 
-        val adapter: ArrayAdapter<String> =
-
-            ArrayAdapter<String>(
-                this,
-                R.layout.spinner_text, currencyCodes
-            )
-
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spCurrecncy.adapter = adapter
+        var operatorAdapter = CurrencySpinnerAdapter(this, currencyAdapterList)
+        spCurrecncy.adapter = operatorAdapter
 
 
     }
 
     private fun populateGridView() {
-        val adapter = CurrecnyGridAdapter(this@MainActivity, currencyCodes)
+        var adapter = CurrecnyGridAdapter(this, currencyAdapterList)
         gvCurrency.adapter = adapter
     }
 
@@ -232,7 +265,7 @@ class MainActivity : AppCompatActivity() {
         //model.currencies = "EUR,GBP,CAD,PLN"
         model.source = Constrants.source
         model.format = Constrants.format
-        // this.let { currencyViewModel.getCurrencyData(model) }
+         this.let { currencyViewModel.getCurrencyData(model) }
 
     }
 
@@ -249,8 +282,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        checkPauseTime()
+
         mainHandler.post(updateTextTask)
+
+       // checkPauseTime()
 
     }
 

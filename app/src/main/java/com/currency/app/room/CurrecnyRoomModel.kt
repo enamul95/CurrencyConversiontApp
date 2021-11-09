@@ -33,13 +33,10 @@ data class CurrecnyRoomModel(
     @SerializedName("from")
     var from: String = "",
 
-    @ColumnInfo(name = "to")
-    @SerializedName("to")
-    var to: String = "",
+    @ColumnInfo(name = "conversionCurrency")
+    @SerializedName("conversionCurrency")
+    var conversionCurrency: String = "",
 
-    @ColumnInfo(name = "amount")
-    @SerializedName("amount")
-    var amount: Double = 0.00,
 
     @ColumnInfo(name = "currecyRate")
     @SerializedName("currecyRate")

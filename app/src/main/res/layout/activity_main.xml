@@ -24,7 +24,6 @@
             android:hint="@string/amount_hints"
             android:inputType="numberDecimal"
             android:layout_marginRight="@dimen/maring_5"
-            android:text="1"
             android:layout_weight="1"/>
 
         <androidx.appcompat.widget.AppCompatSpinner

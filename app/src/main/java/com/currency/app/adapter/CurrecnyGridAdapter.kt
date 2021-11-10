@@ -11,26 +11,30 @@ import com.currency.app.R
 import com.currency.app.model.CurrencyAdapterModel
 import java.util.ArrayList
 
-class CurrecnyGridAdapter(private var activity: Activity, private var currencyList: ArrayList<CurrencyAdapterModel>) :  BaseAdapter() {
+class CurrecnyGridAdapter(
+    private var activity: Activity,
+    private var currencyList: ArrayList<CurrencyAdapterModel>
+) : BaseAdapter() {
 
 
     private class ViewHolder(row: View) {
         var tvCurrencyCode: TextView? = null
+
         init {
             this.tvCurrencyCode = row?.findViewById(R.id.tvCurrencyCode)
         }
     }
 
     override fun getCount(): Int {
-      return  currencyList.size
+        return currencyList.size
     }
 
     override fun getItem(position: Int): Any {
-         return  currencyList.size
+        return currencyList.size
     }
 
     override fun getItemId(position: Int): Long {
-      return  position.toLong()
+        return position.toLong()
     }
 
 
@@ -38,7 +42,8 @@ class CurrecnyGridAdapter(private var activity: Activity, private var currencyLi
         val view: View
         val viewHolder: ViewHolder
         if (convertView == null) {
-            val inflater = activity?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            val inflater =
+                activity?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
             view = inflater.inflate(R.layout.row_currecny, null)
             viewHolder = ViewHolder(view)
             view.tag = viewHolder
@@ -48,7 +53,7 @@ class CurrecnyGridAdapter(private var activity: Activity, private var currencyLi
         }
 
         var currency = currencyList[position]
-        viewHolder.tvCurrencyCode?.text =  currency.conversionCurrency
+        viewHolder.tvCurrencyCode?.text = currency.conversionCurrency
 
         return view as View
     }

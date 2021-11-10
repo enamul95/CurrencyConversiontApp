@@ -70,7 +70,6 @@ class CurrecnyRoomViewMoel(application: Application) : AndroidViewModel(applicat
         return pauseRefreshRepsone
     }
 
-
     fun getCurrencyList(): LiveData<List<CurrecnyRoomModel>>? {
         currencyListRepsone = repository.getCurrencyList()
         return currencyListRepsone

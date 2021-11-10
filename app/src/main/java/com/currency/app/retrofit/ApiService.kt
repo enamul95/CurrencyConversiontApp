@@ -1,4 +1,5 @@
 package com.currency.app.retrofit
+
 import com.currency.app.model.CurrencyDataModel
 import com.currency.app.model.CurrencyModel
 import com.currency.app.util.IpConfigure
@@ -31,7 +32,7 @@ class ApiService {
     fun getCurrencyData(model: CurrencyModel): Single<CurrencyDataModel> {
         return api.getCurrencyData(
             model.access_key,
-           // model.currencies,
+            // model.currencies,
             model.source,
             model.format
 

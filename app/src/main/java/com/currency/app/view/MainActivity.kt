@@ -26,7 +26,6 @@ import com.currency.app.viewmodel.CurrecnyRoomViewMoel
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var currencyViewModel: CurrencyViewModel
 
     private lateinit var etAmount: EditText
     private lateinit var spCurrecncy: AppCompatSpinner
@@ -35,7 +34,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var currencyCodes: Array<String>
     private lateinit var pDialog: ProgressDialog
+
     private lateinit var currencyList: java.util.ArrayList<CurrecnyRoomModel>
+    private lateinit var currencyViewModel: CurrencyViewModel
     private lateinit var currecnyRoomViewMoel: CurrecnyRoomViewMoel
 
     lateinit var mainHandler: Handler
@@ -67,7 +68,6 @@ class MainActivity : AppCompatActivity() {
         currencyCodes = resources.getStringArray(R.array.currency_codes)
 
 
-
         spCurrecncy.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
@@ -77,10 +77,7 @@ class MainActivity : AppCompatActivity() {
             ) {
                 var tv_currecy_code: TextView? = view?.findViewById(R.id.tv_currecy_code)
                 var currencyCode = tv_currecy_code?.text.toString()
-                Toast.makeText(applicationContext, currencyCode, Toast.LENGTH_SHORT).show()
-                // if(tv_currecy_code?.text.toString() != ""){
                 currecnyRoomViewMoel.getSourceCurrencyRate(currencyCode)
-                // }
                 sourceCurrencyObserable()
             }
 
@@ -102,15 +99,14 @@ class MainActivity : AppCompatActivity() {
         })
 
 
-
-
         if (!CheckNetwork.isOnline(this@MainActivity)) {
             Toast.makeText(applicationContext, "No Internet Connection", Toast.LENGTH_SHORT).show()
         } else {
-            getRowCount();
+            currecnyRoomViewMoel.getRowCount()
         }
 
         currecnyRoomViewMoel.getCurrencyList()
+        currecnyRoomViewMoel.getPauseRefreshTime();
 
         currecySpinnerLoad()
         populateGridView()
@@ -119,6 +115,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun observeViewModel() {
 
+        //check currency is empty. if empty then load from currency layer api
         currecnyRoomViewMoel.rowCountResposne?.observe(this, {
             it?.let {
                 if (it == 0) {
@@ -127,6 +124,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        //get all Currecy from SQLITE DB
         currecnyRoomViewMoel.currencyListRepsone?.observe(this, {
             it?.let {
                 for (i in 0 until it!!.size) {
@@ -139,11 +137,13 @@ class MainActivity : AppCompatActivity() {
                     )
                     currencyAdapterList.add(model)
                 }
+                //reload data
                 populateGridView()
                 currecySpinnerLoad()
 
             }
         })
+        //get Currencies data from API & store data in sqlite db
         currencyViewModel.currecnyResponse.observe(this, {
             it?.let {
                 pDialog.dismiss()
@@ -182,6 +182,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        //Error Response from api
         currencyViewModel.errorResponse.observe(this, {
             it?.let {
                 pDialog.dismiss()
@@ -189,10 +190,21 @@ class MainActivity : AppCompatActivity() {
 
             }
         })
+
+        //Screen off or on count 30 minutes time
+        currecnyRoomViewMoel.pauseRefreshRepsone?.observe(this, {
+            it?.let {
+                currecnyRoomViewMoel.deletePauseTime()
+                var difm = System.currentTimeMillis() - it.pasuseMillisecon
+                if (difm > Constrants.refreshApiTime) {
+                    getCurrencyData()
+                }
+            }
+        })
     }
 
+    //source Currency observable
     fun sourceCurrencyObserable() {
-
         currecnyRoomViewMoel.sourceCurrencyRateRepsone?.observe(this, {
             it?.let {
                 sourceCurrencyRate = it.currecyRate
@@ -201,6 +213,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    //Convertion Currency observable
     fun conversionCurrencyObserable() {
 
         currecnyRoomViewMoel.conversionCurrencyRateRepsone?.observe(this, {
@@ -212,9 +225,8 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
+    //convert source currency to converstion currency
     fun convertionAmount() {
-
         try {
             var amount = etAmount.text.toString().trim().toDouble()
             var conversionAmount = (conversionCurrencyRate / sourceCurrencyRate) * amount
@@ -227,32 +239,25 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    //populate currency spinner
     private fun currecySpinnerLoad() {
         var operatorAdapter = CurrencySpinnerAdapter(this, currencyAdapterList)
         spCurrecncy.adapter = operatorAdapter
     }
 
+    //populate currency gride
     private fun populateGridView() {
         var adapter = CurrecnyGridAdapter(this, currencyAdapterList)
         gvCurrency.adapter = adapter
     }
 
-    private fun getRowCount() {
-        currecnyRoomViewMoel.getRowCount()
-    }
-
-
+    //api calling
     private fun getCurrencyData() {
-        Log.e("***api***", "caling*****")
-        // pDialog.show()
-
         val model = CurrencyModel()
         model.access_key = Constrants.access_key
-        //model.currencies = "EUR,GBP,CAD,PLN"
         model.source = Constrants.source
         model.format = Constrants.format
         this.let { currencyViewModel.getCurrencyData(model) }
-
     }
 
     //Api call after 30 minutes
@@ -268,13 +273,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-
         mainHandler.post(updateTextTask)
-
-        // checkPauseTime()
-
     }
 
+    // refresg api after 30 minutes
     private val updateTextTask = object : Runnable {
         override fun run() {
             mainHandler.postDelayed(this, Constrants.refreshApiTime)
@@ -286,26 +288,5 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkPauseTime() {
-        currecnyRoomViewMoel.getPauseRefreshTime()
-        pauseObservable()
-
-    }
-
-    fun pauseObservable() {
-
-        currecnyRoomViewMoel.pauseRefreshRepsone?.observe(this, {
-            it?.let {
-                currecnyRoomViewMoel.deletePauseTime()
-                if (it.isPause) {
-                    var difm = System.currentTimeMillis() - it.pasuseMillisecon
-                    if (difm > Constrants.refreshApiTime) {
-                        //refresh api
-                        getCurrencyData()
-                    }
-                }
-            }
-        })
-    }
 
 }

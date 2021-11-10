@@ -9,22 +9,12 @@ data class CurrencyDataModel(
     @SerializedName("timestamp")
     var timestamp: Int?,
 
-   @SerializedName("quotes")
-     var quotes: Map<String, Double>?
-
-
+    @SerializedName("quotes")
+    var quotes: Map<String, Double>?
 
 )
-
-//data class Quotes(
-//    @SerializedName("success")
-//    var success: Boolean?,
-//
-//    @SerializedName("timestamp")
-//    var timestamp: Int?
-//)
 
 data class ErrorDataModel(
     var errorCode: String? = "",
     var errorMessage: String? = "",
-    )
+)

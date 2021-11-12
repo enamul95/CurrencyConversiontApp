@@ -15,7 +15,7 @@ interface CurrencyDao {
     @Query("DELETE FROM currency")
     suspend fun deleteAllCurrency()
 
-    @Query("SELECT * FROM currency order by conversionCurrency asc")
+    @Query("SELECT * FROM currency order by  UPPER(conversionCurrency) ASC")
     fun getCurrencList(): LiveData<List<CurrecnyRoomModel>>
 
     @Query("SELECT * FROM currency WHERE conversionCurrency =:currecyCode")
